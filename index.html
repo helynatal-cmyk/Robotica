@@ -1,11 +1,93 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Primeira Pagina</title>
+    <title>Monitor de Luz - ESP32</title>
+    <!-- Biblioteca MQTT -->
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #2c3e50;
+            color: white;
+            text-align: center;
+            padding-top: 50px;
+            transition: background-color 0.5s; /* Efeito suave ao mudar de cor */
+        }
+        .painel {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            display: inline-block;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        .valor {
+            font-size: 60px;
+            font-weight: bold;
+            margin: 20px 0;
+            color: #f1c40f;
+        }
+        #status-msg {
+            font-size: 20px;
+            font-style: italic;
+        }
+        .conexao { color: #2ecc71; font-size: 14px; margin-bottom: 20px;}
+    </style>
 </head>
 <body>
-    <h1> Estacionamento Versao 2.0</h1>
+
+    <div class="painel">
+        <h2>Nível de Luminosidade</h2>
+        <div class="conexao" id="status-conexao">Conectando ao ESP32...</div>
+        
+        <div class="valor" id="luz-display">0%</div>
+        <div id="status-msg">Aguardando dados...</div>
+    </div>
+
+    <script>
+        // O MESMO tópico que você colocou no código do ESP32
+        //const topico_mqtt = 'meu_projeto_secreto/luminosidade'; 
+        const topico_mqtt = 'Barao_Ldr/sensores';
+        const brokerUrl = 'wss://broker.hivemq.com:8884/mqtt';
+
+        const client = mqtt.connect(brokerUrl);
+
+        client.on('connect', function () {
+            document.getElementById('status-conexao').innerText = '🟢 Online - Escutando o ESP32';
+            client.subscribe(topico_mqtt);
+        });
+
+        client.on('message', function (topic, message) {
+            try {
+                // Lê o JSON que veio do ESP32
+                const dados = JSON.parse(message.toString());
+                const nivelLuz = dados.Sensor;
+
+                // Atualiza o número grandão na tela
+                document.getElementById('luz-display').innerText = nivelLuz + '%';
+
+                // Lógica visual: Muda o texto e o fundo da tela dependendo da luz
+                const body = document.body;
+                const statusMsg = document.getElementById('status-msg');
+
+                if (nivelLuz < 400) {
+                    body.style.backgroundColor = '#2c3e50'; // Escuro
+                    statusMsg.innerText = "🌙 Está muito escuro aqui!";
+                } else if (nivelLuz >= 400 && nivelLuz < 2000) {
+                    body.style.backgroundColor = '#d35400'; // Alaranjado
+                    statusMsg.innerText = "🌤️ Luz ambiente normal.";
+                } else {
+                    body.style.backgroundColor = '#f39c12'; // Amarelo Claro
+                    statusMsg.innerText = "☀️ Muita luz! Está claro demais.";
+                }
+
+            } catch (e) {
+                console.error("Erro ao ler os dados", e);
+            }
+        });
+    </script>
 </body>
 </html>
