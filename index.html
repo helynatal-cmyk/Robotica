@@ -3,91 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monitor de Luz - ESP32</title>
+    <title>Mapa Dinâmico de Luminosidade</title>
     <!-- Biblioteca MQTT -->
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: Arial, sans-serif;
             background-color: #2c3e50;
             color: white;
             text-align: center;
-            padding-top: 50px;
-            transition: background-color 0.5s; /* Efeito suave ao mudar de cor */
+            padding: 20px;
         }
-        .painel {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 30px;
-            border-radius: 15px;
+
+        /* 1. O container principal (O "Quadro" do desenho) */
+        .mapa-container {
+            position: relative; /* Isso é o que permite os retângulos ficarem por cima */
             display: inline-block;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            backdrop-filter: blur(4px);
-            border: 1px solid rgba(255, 255, 255, 0.18);
+            margin: 0 auto;
+            border: 4px solid #34495e;
+            border-radius: 8px;
+            overflow: hidden; /* Corta o que sobrar para fora */
         }
-        .valor {
-            font-size: 60px;
-            font-weight: bold;
-            margin: 20px 0;
-            color: #f1c40f;
+
+        /* 2. A Imagem de Fundo (Seu desenho) */
+        .desenho-fundo {
+            display: block;
+            max-width: 800px; /* Ajuste para o tamanho do seu desenho */
+            height: auto;
         }
-        #status-msg {
-            font-size: 20px;
-            font-style: italic;
+        .figura-sensor {
+            position: absolute;
+            width: 100px;  /* Tamanho da sua figura */
+            height: 80px;
+            /* O Translate -50% garante que o centro da figura fique exatamente na coordenada escolhida */
+            transform: translate(-50%, -50%);
+            transition: all 0.5s ease; /* Transição suave de meio segundo */
+            
+            /* Começa "apagada" (opacidade baixa) e sem brilho */
+            opacity: 3; 
+            filter: drop-shadow(0 0 0px rgba(255, 255, 0, 0));
         }
-        .conexao { color: #2ecc71; font-size: 14px; margin-bottom: 20px;}
+
+        /* Posição de cada figura em cima do desenho */
+        #fig1 { top: 63%; left: 20%; }
+        #fig2 { top: 63%; left: 40%; }
+        #fig3 { top: 63%; left: 61%; }
+        #fig4 { top: 63%; left: 82%; }
+       
     </style>
 </head>
 <body>
 
-    <div class="painel">
-        <h2>Nível de Luminosidade</h2>
-        <div class="conexao" id="status-conexao">Conectando ao ESP32...</div>
-        
-        <div class="valor" id="luz-display">0%</div>
-        <div id="status-msg">Aguardando dados...</div>
-    </div>
+    <h2>Sistema de Estacionamento 2.0</h2>
+    <p id="status">Conectando ao broker MQTT...</p>
 
-    <script>
-        // O MESMO tópico que você colocou no código do ESP32
-        //const topico_mqtt = 'meu_projeto_secreto/luminosidade'; 
-        const topico_mqtt = 'Barao_Ldr/sensores';
+    <div class="mapa-container">
+        <!-- Substitua este link pela sua imagem! Pode ser um arquivo local ex: "meu_desenho.png" -->
+        <img src="estacionamento.png" alt="Desenho Base" class="desenho-fundo">
+        
+        <!-- Os 4 retângulos que ficarão por cima -->
+        <img src="carro.png" id="fig1" class="figura-sensor">
+        <img src="carro.png" id="fig2" class="figura-sensor">
+        //<img src="carro.png" id="fig3" class="figura-sensor">
+        //<img src="carro.png" id="fig4" class="figura-sensor">
+    </div>
+<script>
+        // Configurações do MQTT
         const brokerUrl = 'wss://broker.hivemq.com:8884/mqtt';
+        const topico_mqtt = 'Barao_Ldr/sensores'; // O mesmo tópico do ESP32
 
         const client = mqtt.connect(brokerUrl);
 
         client.on('connect', function () {
-            document.getElementById('status-conexao').innerText = '🟢 Online - Escutando o ESP32';
+            document.getElementById('status').innerText = '🟢 Conectado e aguardando dados...';
+            document.getElementById('status').style.color = '#2ecc71';
             client.subscribe(topico_mqtt);
         });
 
+       
+        function atualizarFigura(id, porcentagem) {
+            const figura = document.getElementById(id);
+            
+            if (porcentagem > 3000) {
+                figura.style.opacity = 1; // Aparece
+            } else {
+                figura.style.opacity = 0; // Some
+            }
+        }
+
         client.on('message', function (topic, message) {
             try {
-                // Lê o JSON que veio do ESP32
                 const dados = JSON.parse(message.toString());
-                const nivelLuz = dados.Sensor;
 
-                // Atualiza o número grandão na tela
-                document.getElementById('luz-display').innerText = nivelLuz + '%';
-
-                // Lógica visual: Muda o texto e o fundo da tela dependendo da luz
-                const body = document.body;
-                const statusMsg = document.getElementById('status-msg');
-
-                if (nivelLuz < 400) {
-                    body.style.backgroundColor = '#2c3e50'; // Escuro
-                    statusMsg.innerText = "🌙 Está muito escuro aqui!";
-                } else if (nivelLuz >= 400 && nivelLuz < 2000) {
-                    body.style.backgroundColor = '#d35400'; // Alaranjado
-                    statusMsg.innerText = "🌤️ Luz ambiente normal.";
-                } else {
-                    body.style.backgroundColor = '#f39c12'; // Amarelo Claro
-                    statusMsg.innerText = "☀️ Muita luz! Está claro demais.";
-                }
+                // Aplica a regra para cada figura independentemente
+                atualizarFigura('fig1', dados.ldr1);
+                atualizarFigura('fig2', dados.ldr2);
+                //atualizarFigura('fig3', dados.ldr3);
+                //atualizarFigura('fig4', dados.ldr4);
 
             } catch (e) {
-                console.error("Erro ao ler os dados", e);
+                console.error("Erro ao ler JSON:", e);
             }
         });
     </script>
+
+   
 </body>
 </html>
