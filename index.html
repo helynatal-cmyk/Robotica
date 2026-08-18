@@ -64,7 +64,7 @@
         <!-- Os 4 retângulos que ficarão por cima -->
         <img src="carro.png" id="fig1" class="figura-sensor">
         <img src="carro.png" id="fig2" class="figura-sensor">
-        //<img src="carro.png" id="fig3" class="figura-sensor">
+        // <img src="carro.png" id="fig3" class="figura-sensor">
         //<img src="carro.png" id="fig4" class="figura-sensor">
     </div>
 <script>
@@ -96,8 +96,8 @@
                 const dados = JSON.parse(message.toString());
 
                 // Aplica a regra para cada figura independentemente
-                atualizarFigura('fig1', dados.ldr1);
-                atualizarFigura('fig2', dados.ldr2);
+                atualizarFigura('fig1', dados.Sensor1);
+                atualizarFigura('fig2', dados.Sensor2);
                 //atualizarFigura('fig3', dados.ldr3);
                 //atualizarFigura('fig4', dados.ldr4);
 
