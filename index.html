@@ -64,8 +64,8 @@
         <!-- Os 4 retângulos que ficarão por cima -->
         <img src="carro.png" id="fig1" class="figura-sensor">
         <img src="carro.png" id="fig2" class="figura-sensor">
-        // <img src="carro.png" id="fig3" class="figura-sensor">
-        //<img src="carro.png" id="fig4" class="figura-sensor">
+        <!--<img src="carro.png" id="fig3" class="figura-sensor">--> 
+        <!--<img src="carro.png" id="fig4" class="figura-sensor">--> 
     </div>
 <script>
         // Configurações do MQTT
@@ -84,7 +84,7 @@
         function atualizarFigura(id, porcentagem) {
             const figura = document.getElementById(id);
             
-            if (porcentagem > 3000) {
+            if (porcentagem < 3000) {
                 figura.style.opacity = 1; // Aparece
             } else {
                 figura.style.opacity = 0; // Some
