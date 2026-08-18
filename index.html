@@ -85,9 +85,9 @@
             const figura = document.getElementById(id);
             
             if (porcentagem < 3000) {
-                figura.style.opacity = 1; // Aparece
+                figura.style.opacity = 0; // Aparece
             } else {
-                figura.style.opacity = 0; // Some
+                figura.style.opacity = 1; // Some
             }
         }
 
@@ -96,6 +96,8 @@
                 const dados = JSON.parse(message.toString());
 
                 // Aplica a regra para cada figura independentemente
+
+               
                 atualizarFigura('fig1', dados.Sensor1);
                 atualizarFigura('fig2', dados.Sensor2);
                 //atualizarFigura('fig3', dados.ldr3);
