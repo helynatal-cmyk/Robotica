@@ -47,8 +47,8 @@
         /* Posição de cada figura em cima do desenho */
         #fig1 { top: 63%; left: 20%; }
         #fig2 { top: 63%; left: 40%; }
-        /* #fig3 { top: 63%; left: 61%; }
-         #fig4 { top: 63%; left: 82%; } */
+        #fig3 { top: 63%; left: 61%; }
+        #fig4 { top: 63%; left: 82%; }
        
     </style>
 </head>
@@ -64,8 +64,8 @@
         <!-- Os 4 retângulos que ficarão por cima -->
         <img src="carro.png" id="fig1" class="figura-sensor">
         <img src="carro.png" id="fig2" class="figura-sensor">
-        <!--<img src="carro.png" id="fig3" class="figura-sensor">--> 
-        <!--<img src="carro.png" id="fig4" class="figura-sensor">--> 
+        <img src="carro.png" id="fig3" class="figura-sensor">
+        <img src="carro.png" id="fig4" class="figura-sensor">
     </div>
 <script>
         // Configurações do MQTT
@@ -100,8 +100,8 @@
                
                 atualizarFigura('fig1', dados.Sensor1);
                 atualizarFigura('fig2', dados.Sensor2);
-                //atualizarFigura('fig3', dados.ldr3);
-                //atualizarFigura('fig4', dados.ldr4);
+                atualizarFigura('fig3', dados.Sensor3);
+                atualizarFigura('fig4', dados.Sensor4);
 
             } catch (e) {
                 console.error("Erro ao ler JSON:", e);
